@@ -1,0 +1,318 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BlockTrade — Hybrid Blockchain Trading Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sb-brand">
+    <h1>BlockTrade</h1>
+    <p>Blockchain Demo System</p>
+  </div>
+  <div class="sb-section">Nodes</div>
+  <div class="sb-nav">
+    <a href="#" data-page="admin">
+      <span class="icon">⚙</span><span>Admin Panel</span>
+    </a>
+    <a href="#" class="active" data-page="dashboard">
+      <span class="icon">⬡</span><span>Dashboard</span>
+    </a>
+    <a href="#" data-page="trader">
+      <span class="icon">👤</span><span>Trader Node</span>
+    </a>
+    <a href="#" data-page="matching">
+      <span class="icon">⇄</span><span>Matching Engine</span>
+    </a>
+    <a href="#" data-page="trader-auth">
+      <span class="icon">🏦</span><span>Trader Authority</span>
+    </a>
+    <a href="#" data-page="asset-auth">
+      <span class="icon">📦</span><span>Asset Authority</span>
+    </a>
+    <a href="#" data-page="coordinator">
+      <span class="icon">⚖</span><span>Coordinator</span>
+    </a>
+    <a href="#" data-page="ledger">
+      <span class="icon">🔗</span><span>Blockchain Ledger</span>
+    </a>
+  </div>
+  <div class="sb-footer">
+    <div class="chain-status"><div class="pulse"></div> Chain Valid</div>
+  </div>
+</nav>
+
+<!-- MAIN AREA -->
+<div id="main">
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <h2>System Dashboard</h2>
+      <p>Real-time overview of the hybrid blockchain trading system</p>
+    </div>
+    <div class="grid-4" style="margin-bottom:20px">
+      <div class="stat-card"><div class="lbl">Total Orders</div><div class="val" id="stat-orders">0</div><div class="delta">↑ active</div></div>
+      <div class="stat-card"><div class="lbl">Matched Trades</div><div class="val" id="stat-trades">0</div><div class="delta">↑ processed</div></div>
+      <div class="stat-card"><div class="lbl">Blocks Mined</div><div class="val" id="stat-blocks">1</div><div class="delta">↑ on-chain</div></div>
+      <div class="stat-card"><div class="lbl">Success Rate</div><div class="val" id="stat-rate">—</div><div class="delta">commits / total</div></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-title">Trade Flow</div>
+        <div class="flow">
+          <div class="flow-step"><div class="flow-dot done">👤</div><div class="flow-label">Place Order</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-dot done">⇄</div><div class="flow-label">Match Engine</div></div>
+          <div class="flow-arrow">→</div>
+
+          <!-- Parallel block -->
+          <div class="flow-parallel">
+            <div class="flow-step"><div class="flow-dot done">🏦</div><div class="flow-label">Trader Auth</div></div>
+            <div class="flow-step"><div class="flow-dot done">📦</div><div class="flow-label">Asset Auth</div></div>
+          </div>
+          <!-- End parallel block -->
+
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-dot done">⚖</div><div class="flow-label">Coordinator</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-dot done">🔗</div><div class="flow-label">Blockchain</div></div>
+        </div>
+
+      </div>
+      <div class="card">
+        <div class="card-title">Trader Balances</div>
+        <table id="tbl-traders"><thead><tr><th>Trader</th><th>Balance (₹)</th><th>Holdings</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Activity Log</div>
+      <div class="terminal" id="log-dash"></div>
+    </div>
+  </div>
+
+  <!-- ═══ TRADER NODE ═══ -->
+  <div class="page" id="page-trader">
+    <div class="page-header">
+      <h2>Trader Node</h2>
+      <p>Place BUY or SELL orders into the order book</p>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Place Order</div>
+        <div class="form-group">
+          <label>Trader ID</label>
+          <select id="o-trader">
+            <option value="TRADER_A">TRADER_A — Alice</option>
+            <option value="TRADER_B">TRADER_B — Bob</option>
+            <option value="TRADER_C">TRADER_C — Carol</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Order Type</label>
+          <select id="o-type">
+            <option value="BUY">BUY</option>
+            <option value="SELL">SELL</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Stock</label>
+          <select id="o-stock">
+            <option>AAPL</option><option>TSLA</option><option>GOOG</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Quantity</label>
+          <input type="number" id="o-qty" value="5" min="1"/>
+        </div>
+        <div class="form-group">
+          <label>Price per Share (₹)</label>
+          <input type="number" id="o-price" value="150" min="1"/>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="placeOrder()">📨 Place Order</button>
+      </div>
+      <div class="card">
+        <div class="card-title">My Open Orders</div>
+        <table id="tbl-myorders">
+          <thead><tr><th>ID</th><th>Type</th><th>Stock</th><th>Qty</th><th>Price</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MATCHING ENGINE ═══ -->
+  <div class="page" id="page-matching">
+    <div class="page-header">
+      <h2>Matching Engine</h2>
+      <p>Order book and automatic trade matching</p>
+    </div>
+    <div style="margin-bottom:16px">
+      <button class="btn btn-primary" onclick="matchOrders()">⇄ Run Matching Engine</button>
+    </div>
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-title">BUY Orders</div>
+        <table id="tbl-buy"><thead><tr><th>Trader</th><th>Stock</th><th>Qty</th><th>Price</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-title">SELL Orders</div>
+        <table id="tbl-sell"><thead><tr><th>Trader</th><th>Stock</th><th>Qty</th><th>Price</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Pending Matched Trades</div>
+      <table id="tbl-pending"><thead><tr><th>Trade ID</th><th>Buyer</th><th>Seller</th><th>Stock</th><th>Qty</th><th>Price</th><th>Status</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <!-- ═══ TRADER AUTHORITY ═══ -->
+  <div class="page" id="page-trader-auth">
+    <div class="page-header">
+      <h2>Trader Authority Node</h2>
+      <p>Validates buyer's balance and locks funds for settlement</p>
+    </div>
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-title">Pending Trades Awaiting Validation</div>
+        <table id="tbl-ta-pending"><thead><tr><th>Trade ID</th><th>Buyer</th><th>Stock</th><th>Cost</th><th>Action</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-title">Validation Results</div>
+        <div class="terminal" id="log-ta"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Trader Balances</div>
+      <table id="tbl-ta-balances"><thead><tr><th>Trader</th><th>Balance (₹)</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <div class="card-title" style="display:flex;align-items:center;gap:12px">
+        🏦 Trader Authority Ledger
+        <span id="ta-chain-valid-badge" class="badge badge-commit">✓ Chain Valid</span>
+        <span id="ta-chain-length" class="badge badge-info">1 block</span>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Every committed trade appends a buyer validation record to this chain</p>
+      <div class="block-chain" id="ta-blockchain-view"></div>
+    </div>
+  </div>
+
+  <!-- ═══ ASSET AUTHORITY ═══ -->
+  <div class="page" id="page-asset-auth">
+    <div class="page-header">
+      <h2>Asset Authority Node</h2>
+      <p>Validates seller's share ownership and locks shares</p>
+    </div>
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-title">Pending Trades Awaiting Validation</div>
+        <table id="tbl-aa-pending"><thead><tr><th>Trade ID</th><th>Seller</th><th>Stock</th><th>Qty</th><th>Action</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-title">Validation Results</div>
+        <div class="terminal" id="log-aa"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Asset Holdings</div>
+      <table id="tbl-aa-assets"><thead><tr><th>Trader</th><th>AAPL</th><th>TSLA</th><th>GOOG</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <div class="card-title" style="display:flex;align-items:center;gap:12px">
+        📦 Asset Authority Ledger
+        <span id="aa-chain-valid-badge" class="badge badge-commit">✓ Chain Valid</span>
+        <span id="aa-chain-length" class="badge badge-info">1 block</span>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Every committed trade appends a seller share validation record to this chain</p>
+      <div class="block-chain" id="aa-blockchain-view"></div>
+    </div>
+  </div>
+
+  <!-- ═══ COORDINATOR ═══ -->
+  <div class="page" id="page-coordinator">
+    <div class="page-header">
+      <h2>Atomic Coordinator Node</h2>
+      <p>Two-phase commit — coordinates trader and asset authority results</p>
+    </div>
+    <div style="margin-bottom:16px">
+      <button class="btn btn-primary" onclick="coordinateTrade()">⚖ Run Coordinator</button>
+    </div>
+    <div id="coord-display">
+      <div class="card" style="margin-bottom:16px;text-align:center;color:var(--muted);padding:40px">
+        No pending trade to coordinate. Run the matching engine first.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Coordination History</div>
+      <table id="tbl-coord-hist"><thead><tr><th>Trade ID</th><th>Trader Check</th><th>Asset Check</th><th>Decision</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <!-- ═══ BLOCKCHAIN LEDGER ═══ -->
+  <div class="page" id="page-ledger">
+    <div class="page-header">
+      <h2>Blockchain Ledger</h2>
+      <p>Immutable record of all committed trades — click blocks to expand</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <span id="chain-valid-badge" class="badge badge-buy">✓ Chain Valid</span>
+      <span id="chain-length" class="badge badge-info">0 blocks</span>
+      <button class="btn btn-outline" onclick="loadLedger()">↻ Refresh</button>
+    </div>
+    <div class="block-chain" id="blockchain-view"></div>
+  </div>
+
+  <div class="page" id="page-admin">
+  <div class="page-header">
+    <h2>Admin Panel</h2>
+    <p>Add traders and new assets dynamically</p>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- ADD TRADER -->
+    <div class="card">
+      <div class="card-title">Add Trader</div>
+
+      <div class="form-group">
+        <label>Name</label>
+        <input id="new-name" placeholder="Enter name"/>
+      </div>
+
+      <div class="form-group">
+        <label>Initial Balance</label>
+        <input type="number" id="new-balance" value="10000"/>
+      </div>
+
+      <button class="btn btn-primary btn-full" onclick="addTrader()">Add Trader</button>
+    </div>
+
+    <!-- ADD ASSET -->
+    <div class="card">
+      <div class="card-title">Add Asset</div>
+
+      <div class="form-group">
+        <label>Stock Symbol</label>
+        <input id="new-stock" placeholder="e.g. INFY"/>
+      </div>
+
+      <button class="btn btn-success btn-full" onclick="addAsset()">Add Asset</button>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- end main -->
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>
